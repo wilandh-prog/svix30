@@ -13,7 +13,7 @@ Steps
 2. Build the OMXS30 option chain and compute the SVIX30 index.
 3. Append the result to data/history.csv (keyed by trade date, idempotent —
    re-running on the same date replaces that date's row).
-4. Regenerate site/index.html from site/template.html with the full history
+4. Regenerate docs/index.html from docs/template.html with the full history
    and the latest term structure inlined as JSON.
 
 Designed to be safe under Task Scheduler: never raises out of main(),
@@ -32,7 +32,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
-SITE_DIR = ROOT / "site"
+SITE_DIR = ROOT / "docs"
 LOG_DIR = ROOT / "logs"
 HISTORY_CSV = DATA_DIR / "history.csv"
 TEMPLATE = SITE_DIR / "template.html"
