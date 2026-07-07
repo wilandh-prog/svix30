@@ -11,9 +11,11 @@ Steps
 -----
 1. Download the latest Nasdaq Nordic pre-trade derivatives snapshot.
 2. Build the OMXS30 option chain and compute the SVIX30 index.
-3. Append the result to data/history.csv (keyed by trade date, idempotent —
-   re-running on the same date replaces that date's row).
-4. Regenerate docs/index.html from docs/template.html with the full history
+3. Compute the same 30-day index for every other underlying in the feed
+   with enough usable quotes (near and next expiry slices both valid).
+4. Append the results to data/history.csv (keyed by underlying + trade
+   date, idempotent — re-running on the same date replaces those rows).
+5. Regenerate docs/index.html from docs/template.html with the full history
    and the latest term structure inlined as JSON.
 
 Designed to be safe under Task Scheduler: never raises out of main(),
@@ -102,12 +104,16 @@ def load_history() -> list[dict]:
         return []
     import csv
     with HISTORY_CSV.open(newline="", encoding="utf-8-sig") as f:
-        return list(csv.DictReader(f))
+        rows = list(csv.DictReader(f))
+    for row in rows:  # rows written before the multi-underlying format
+        if not row.get("underlying"):
+            row["underlying"] = UNDERLYING
+    return rows
 
 
 def save_history(rows: list[dict]) -> None:
     import csv
-    fields = ["date", "svix30", "atm30", "spot",
+    fields = ["date", "underlying", "svix30", "atm30", "spot",
               "near_expiry", "near_days", "near_vol",
               "next_expiry", "next_days", "next_vol", "n_options", "file"]
     with HISTORY_CSV.open("w", newline="", encoding="utf-8") as f:
@@ -121,11 +127,14 @@ def fmt(x: float, nd: int = 2) -> str:
 
 
 def render_site(history: list[dict], term_structure: list[dict],
-                meta: dict) -> None:
+                meta: dict, singles: list[dict],
+                singles_history: dict[str, list]) -> None:
     payload = json.dumps({
         "history": history,
         "term_structure": term_structure,
         "meta": meta,
+        "singles": singles,
+        "singles_history": singles_history,
     }, ensure_ascii=False)
     html = TEMPLATE.read_text(encoding="utf-8")
     html = html.replace("/*__DATA__*/null", payload)
@@ -181,24 +190,51 @@ def main() -> int:
              result.next.expiry if result.next else "-",
              result.next.vol if result.next else float("nan"))
 
-    # --- persist history (idempotent per trade date) ---------------------
-    row = {
-        "date": trade_date.isoformat(),
-        "svix30": fmt(result.value),
-        "atm30": fmt(result.atm30),
-        "spot": fmt(result.spot_estimate),
-        "near_expiry": result.near.expiry if result.near else "",
-        "near_days": fmt(result.near.days, 1) if result.near else "",
-        "near_vol": fmt(result.near.vol) if result.near else "",
-        "next_expiry": result.next.expiry if result.next else "",
-        "next_days": fmt(result.next.days, 1) if result.next else "",
-        "next_vol": fmt(result.next.vol) if result.next else "",
-        "n_options": str(sum(s.n_options for s in result.slices)),
-        "file": file_name,
-    }
-    history = [h for h in load_history() if h["date"] != row["date"]]
-    history.append(row)
-    history.sort(key=lambda h: h["date"])
+    def make_row(underlying: str, res) -> dict:
+        return {
+            "date": trade_date.isoformat(),
+            "underlying": underlying,
+            "svix30": fmt(res.value),
+            "atm30": fmt(res.atm30),
+            "spot": fmt(res.spot_estimate),
+            "near_expiry": res.near.expiry if res.near else "",
+            "near_days": fmt(res.near.days, 1) if res.near else "",
+            "near_vol": fmt(res.near.vol) if res.near else "",
+            "next_expiry": res.next.expiry if res.next else "",
+            "next_days": fmt(res.next.days, 1) if res.next else "",
+            "next_vol": fmt(res.next.vol) if res.next else "",
+            "n_options": str(sum(s.n_options for s in res.slices)),
+            "file": file_name,
+        }
+
+    # --- single-name indices: every other underlying with usable quotes ---
+    # Kept only when both the near and next expiry slice pass the quote-
+    # quality gates, i.e. a genuine interpolated 30-day value exists.
+    opts = df[df["instrument_type"].isin(["call", "put"])]
+    others = [u for u in opts["underlying"].value_counts().index
+              if u and u != UNDERLYING]
+    new_rows = [make_row(UNDERLYING, result)]
+    for und in others:
+        try:
+            uchain = build_chain(df, underlying=und, r=r, as_of=trade_date)
+            if uchain.empty:
+                continue
+            ures = compute_index(uchain, r=r, as_of=trade_date)
+        except Exception:
+            log.exception("Index computation failed for %s — skipping", und)
+            continue
+        if ures.ok and ures.near and ures.next:
+            new_rows.append(make_row(und, ures))
+    log.info("Single-name indices: %d of %d underlyings usable",
+             len(new_rows) - 1, len(others))
+
+    # --- persist history (idempotent per underlying + trade date) --------
+    today = trade_date.isoformat()
+    updated = {r["underlying"] for r in new_rows}
+    history = [h for h in load_history()
+               if not (h["date"] == today and h["underlying"] in updated)]
+    history.extend(new_rows)
+    history.sort(key=lambda h: (h["date"], h["underlying"]))
     save_history(history)
     log.info("History: %d observations", len(history))
 
@@ -230,11 +266,34 @@ def main() -> int:
             "expiry": result.next.expiry, "days": round(result.next.days, 1),
             "vol": round(result.next.vol, 2)},
     }
+    def num(v):
+        return float(v) if v not in (None, "") else None
+
+    singles = sorted(
+        ({
+            "ticker": r2["underlying"],
+            "v": num(r2["svix30"]),
+            "atm30": num(r2["atm30"]),
+            "spot": num(r2["spot"]),
+            "near": r2["near_expiry"], "near_days": num(r2["near_days"]),
+            "next": r2["next_expiry"], "next_days": num(r2["next_days"]),
+            "n": int(r2["n_options"]),
+        } for r2 in new_rows if r2["underlying"] != UNDERLYING),
+        key=lambda s: -(s["v"] or 0),
+    )
+    tickers = {s["ticker"] for s in singles}
+    singles_history: dict[str, list] = {}
+    for h in history:
+        if h["underlying"] in tickers and h.get("svix30"):
+            singles_history.setdefault(h["underlying"], []).append(
+                [h["date"], float(h["svix30"])])
+
     render_site(
         [{"date": h["date"], "svix30": float(h["svix30"]),
           "atm30": float(h["atm30"]) if h.get("atm30") else None}
-         for h in history if h.get("svix30")],
-        term_structure, meta,
+         for h in history
+         if h.get("svix30") and h["underlying"] == UNDERLYING],
+        term_structure, meta, singles, singles_history,
     )
     return 0
 

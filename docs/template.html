@@ -96,6 +96,13 @@
   td { padding: 6px 10px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
   tr:last-child td { border-bottom: none; }
   td.num, th.num { text-align: right; }
+  th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+  th.sortable:hover { color: var(--ink); }
+  #singles-table tbody tr { cursor: pointer; }
+  #singles-table tbody tr:hover td { background: var(--page); }
+  #singles-table tbody tr.sel td { background: var(--page); }
+  #singles-table tbody tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--series-1); font-weight: 650; }
+  .chart-title { font-size: 13px; font-weight: 600; margin: 6px 0 4px; }
   details { margin-top: 6px; }
   summary { cursor: pointer; font-size: 13px; color: var(--ink-2); padding: 6px 0; }
   .scroll-x { overflow-x: auto; }
@@ -110,7 +117,8 @@
 <div class="page">
   <header>
     <h1>SVIX30 — Swedish Implied Volatility Index</h1>
-    <div class="sub">30-day model-free implied volatility of the OMXS30 index, VIX methodology</div>
+    <div class="sub">30-day model-free implied volatility of the OMXS30 index and Stockholm-listed
+      single stocks, VIX methodology</div>
     <div class="meta" id="meta"></div>
   </header>
 
@@ -140,13 +148,26 @@
     <div class="scroll-x"><table id="term-table"></table></div>
   </div>
 
+  <div class="card" id="singles-card">
+    <h2>Single-name volatility indices</h2>
+    <div class="desc">The identical 30-day calculation for every Stockholm-listed equity
+      option class with usable quotes in both interpolation expirations. Click a row to
+      chart that name; click a column header to sort.</div>
+    <div class="chart-title" id="single-title"></div>
+    <div class="chart-wrap" id="single-chart"></div>
+    <div class="scroll-x"><table id="singles-table"></table></div>
+  </div>
+
   <footer>
     <p><strong>Methodology.</strong> SVIX30 replicates the CBOE VIX calculation on OMXS30
     options listed on Nasdaq Stockholm: forwards are estimated per expiration via put-call
     parity, model-free variance is computed from out-of-the-money bid/ask mid-quotes, and
     the two expirations bracketing 30 days are interpolated in total variance to a constant
-    30-day horizon. Quotes are 15-minute-delayed pre-trade data from Nasdaq Nordic trade
-    reports. This is an unofficial research index, not investment advice.</p>
+    30-day horizon. The single-name indices apply the identical calculation to each equity
+    option class in the same feed; a name is included on days when both the near- and
+    next-term expiration pass the quote-quality gates. Quotes are 15-minute-delayed
+    pre-trade data from Nasdaq Nordic trade reports. This is an unofficial research index,
+    not investment advice.</p>
     <p id="foot-meta"></p>
   </footer>
 </div>
@@ -521,6 +542,173 @@ const DATA = /*__DATA__*/null;
   } else {
     termLegend.remove();
     termWrap.innerHTML = '<div class="empty">No term structure in latest snapshot.</div>';
+  }
+
+  // ---- single-name indices --------------------------------------------------
+  const singles = DATA.singles || [];
+  const sHist = DATA.singles_history || {};
+  if (!singles.length) {
+    document.getElementById("singles-card").remove();
+  } else {
+    singles.forEach(s => {
+      const h = sHist[s.ticker] || [];
+      s.d1 = h.length > 1 ? h[h.length - 1][1] - h[h.length - 2][1] : null;
+    });
+
+    const sWrap = document.getElementById("single-chart");
+    const sTT = makeTooltip(sWrap);
+    const sTitle = document.getElementById("single-title");
+    let selTicker = null;
+
+    function drawSingle(ticker) {
+      selTicker = ticker;
+      sTitle.textContent = ticker + " — 30-day IV index, daily closes";
+      sWrap.querySelectorAll("svg, .empty").forEach(e => e.remove());
+      const pts = (sHist[ticker] || []).map(p => ({ date: p[0], v: p[1] }));
+      if (!pts.length) {
+        const e = document.createElement("div"); e.className = "empty";
+        e.textContent = "No history yet for " + ticker + ".";
+        sWrap.append(e); return;
+      }
+      const S_W = 940, S_H = 220, SP = { l: 44, r: 56, t: 12, b: 26 };
+      const svg = el("svg", { viewBox: `0 0 ${S_W} ${S_H}`, role: "img",
+        "aria-label": ticker + " 30-day implied volatility history line chart" });
+      const iw = S_W - SP.l - SP.r, ih = S_H - SP.t - SP.b;
+      let lo = Math.min(...pts.map(p => p.v)), hi = Math.max(...pts.map(p => p.v));
+      const margin = Math.max((hi - lo) * 0.15, 1);
+      lo = Math.max(0, lo - margin); hi += margin;
+      const X = (i) => pts.length === 1 ? SP.l + iw / 2
+                       : SP.l + (i / (pts.length - 1)) * iw;
+      const Y = (v) => SP.t + ih - ((v - lo) / (hi - lo)) * ih;
+
+      for (const t of niceTicks(lo, hi, 5)) {
+        const y = Y(t);
+        svg.append(el("line", { x1: SP.l, x2: S_W - SP.r, y1: y, y2: y,
+          stroke: css("--grid"), "stroke-width": 1 }));
+        const lbl = el("text", { x: SP.l - 8, y: y + 4, "text-anchor": "end",
+          "font-size": 11, fill: css("--muted") });
+        lbl.textContent = t; svg.append(lbl);
+      }
+      const nx = Math.min(pts.length, 5);
+      for (let k = 0; k < nx; k++) {
+        const i = Math.round(k * (pts.length - 1) / Math.max(nx - 1, 1));
+        const lbl = el("text", { x: X(i), y: S_H - 8, "text-anchor": "middle",
+          "font-size": 11, fill: css("--muted") });
+        lbl.textContent = pts[i].date; svg.append(lbl);
+      }
+      svg.append(el("line", { x1: SP.l, x2: S_W - SP.r, y1: SP.t + ih, y2: SP.t + ih,
+        stroke: css("--baseline"), "stroke-width": 1 }));
+
+      if (pts.length > 1) {
+        const d = pts.map((p, i) => (i ? "L" : "M") + X(i) + " " + Y(p.v)).join(" ");
+        svg.append(el("path", {
+          d: d + ` L ${X(pts.length - 1)} ${SP.t + ih} L ${X(0)} ${SP.t + ih} Z`,
+          fill: css("--series-1"), opacity: 0.1 }));
+        svg.append(el("path", { d, fill: "none", stroke: css("--series-1"),
+          "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      }
+      const li = pts.length - 1;
+      svg.append(el("circle", { cx: X(li), cy: Y(pts[li].v), r: 6, fill: css("--surface-1") }));
+      svg.append(el("circle", { cx: X(li), cy: Y(pts[li].v), r: 4, fill: css("--series-1") }));
+      const endLbl = el("text", { x: X(li) + 10, y: Y(pts[li].v) + 4,
+        "font-size": 12, "font-weight": 650, fill: css("--ink") });
+      endLbl.textContent = pts[li].v.toFixed(2);
+      svg.append(endLbl);
+
+      const cross = el("line", { y1: SP.t, y2: SP.t + ih, stroke: css("--baseline"),
+        "stroke-width": 1, visibility: "hidden" });
+      const dot = el("circle", { r: 5, fill: css("--series-1"),
+        stroke: css("--surface-1"), "stroke-width": 2, visibility: "hidden" });
+      const hit = el("rect", { x: SP.l, y: SP.t, width: iw, height: ih,
+        fill: "transparent" });
+      svg.append(cross, dot, hit);
+      hit.addEventListener("pointermove", (ev) => {
+        const r = svg.getBoundingClientRect();
+        const mx = (ev.clientX - r.left) * (S_W / r.width);
+        let best = 0, bd = Infinity;
+        for (let i = 0; i < pts.length; i++) {
+          const d2 = Math.abs(X(i) - mx);
+          if (d2 < bd) { bd = d2; best = i; }
+        }
+        const x = X(best);
+        cross.setAttribute("x1", x); cross.setAttribute("x2", x);
+        cross.setAttribute("visibility", "visible");
+        dot.setAttribute("cx", x); dot.setAttribute("cy", Y(pts[best].v));
+        dot.setAttribute("visibility", "visible");
+        ttContent(sTT, pts[best].date,
+          [{ name: ticker, val: pts[best].v.toFixed(2), color: "--series-1" }]);
+        placeTooltip(sTT, sWrap, x * (r.width / S_W),
+          Y(pts[best].v) * (r.height / S_H));
+      });
+      hit.addEventListener("pointerleave", () => {
+        cross.setAttribute("visibility", "hidden");
+        dot.setAttribute("visibility", "hidden");
+        sTT.style.display = "none";
+      });
+      sWrap.prepend(svg);
+    }
+
+    const COLS = [
+      { key: "ticker", label: "Ticker", num: false },
+      { key: "v",      label: "IV30",   num: true },
+      { key: "d1",     label: "Δ 1d",   num: true },
+      { key: "atm30",  label: "ATM 30d", num: true },
+      { key: "spot",   label: "Forward", num: true },
+      { key: "near",   label: "Near",    num: false },
+      { key: "next",   label: "Next",    num: false },
+      { key: "n",      label: "OTM quotes", num: true },
+    ];
+    let sortKey = "v", sortDir = -1;
+    const sTable = document.getElementById("singles-table");
+
+    function renderSinglesTable() {
+      const rows = singles.slice().sort((a, b) => {
+        const va = a[sortKey], vb = b[sortKey];
+        if (va == null && vb == null) return 0;
+        if (va == null) return 1;
+        if (vb == null) return -1;
+        return (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
+      });
+      sTable.textContent = "";
+      const thead = document.createElement("thead");
+      const htr = document.createElement("tr");
+      COLS.forEach(c => {
+        const th = document.createElement("th");
+        th.className = "sortable" + (c.num ? " num" : "");
+        th.textContent = c.label + (sortKey === c.key ? (sortDir < 0 ? " ▾" : " ▴") : "");
+        th.addEventListener("click", () => {
+          if (sortKey === c.key) sortDir = -sortDir;
+          else { sortKey = c.key; sortDir = c.num ? -1 : 1; }
+          renderSinglesTable();
+        });
+        htr.append(th);
+      });
+      thead.append(htr); sTable.append(thead);
+
+      const tbody = document.createElement("tbody");
+      rows.forEach(s => {
+        const tr = document.createElement("tr");
+        if (s.ticker === selTicker) tr.className = "sel";
+        const d1 = s.d1 == null ? "–" : (s.d1 >= 0 ? "+" : "") + s.d1.toFixed(2);
+        [s.ticker, fmt2(s.v), d1, fmt2(s.atm30), fmt2(s.spot),
+         s.near || "–", s.next || "–", s.n].forEach((v, i) => {
+          const td = document.createElement("td");
+          if (COLS[i].num) td.className = "num";
+          td.textContent = v;
+          tr.append(td);
+        });
+        tr.addEventListener("click", () => {
+          tbody.querySelectorAll("tr.sel").forEach(x => x.classList.remove("sel"));
+          tr.classList.add("sel");
+          drawSingle(s.ticker);
+        });
+        tbody.append(tr);
+      });
+      sTable.append(tbody);
+    }
+
+    drawSingle(singles[0].ticker);
+    renderSinglesTable();
   }
 
   // ---- term structure table -----------------------------------------------

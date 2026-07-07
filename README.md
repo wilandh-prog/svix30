@@ -8,9 +8,11 @@ daily from Nasdaq Nordic pre-trade derivatives data (15-minute delayed, free).
   zero-quote wing-truncation rule, total-variance interpolation to a constant
   30-day horizon. A 30-day ATM IV is computed alongside as a robustness check.
 - **Daily job**: `update_index.py` — aggregates the last pre-close minute-files
-  (quotes are pulled from the feed after 17:25 Stockholm), computes the index,
-  appends to `data/history.csv` (idempotent per trade date) and regenerates the
-  static website `docs/index.html` from `docs/template.html`.
+  (quotes are pulled from the feed after 17:25 Stockholm), computes SVIX30 plus
+  the same 30-day index for every single-stock option class with usable quotes
+  (~55 names), appends to `data/history.csv` (idempotent per underlying and
+  trade date) and regenerates the static website `docs/index.html` from
+  `docs/template.html`.
 - **Automation**: `.github/workflows/update.yml` runs the job on GitHub Actions
   every weekday at 16:45 UTC and commits the updated history and site.
 - **Website**: <https://wilandh-prog.github.io/svix30/> (GitHub Pages, served
