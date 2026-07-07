@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+logs/
+sample_1000.csv
+sample_pretrade.csv
+.claude/settings.local.json

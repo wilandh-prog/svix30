@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVIX30 — Swedish Implied Volatility Index</title>
+<style>
+  :root {
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --series-1: #2a78d6;
+    --series-2: #1baf7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --ink: #ffffff;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --border: rgba(255,255,255,0.10);
+      --series-1: #3987e5;
+      --series-2: #199e70;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.45;
+  }
+  .page { max-width: 980px; margin: 0 auto; padding: 32px 20px 48px; }
+  header h1 { font-size: 22px; font-weight: 650; letter-spacing: -0.01em; }
+  header .sub { color: var(--ink-2); font-size: 14px; margin-top: 2px; }
+  header .meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 24px 0 20px; }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .tile .label { font-size: 12px; color: var(--ink-2); }
+  .tile .value { font-size: 26px; font-weight: 600; margin-top: 2px; }
+  .tile.hero .value { font-size: 48px; line-height: 1.1; }
+  .tile .delta { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .tile .note { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .filters { display: flex; gap: 6px; align-items: center; margin: 4px 0 10px; }
+  .filters .flabel { font-size: 12px; color: var(--muted); margin-right: 4px; }
+  .filters button {
+    font: inherit; font-size: 13px; color: var(--ink-2);
+    background: transparent; border: 1px solid transparent;
+    border-radius: 7px; padding: 4px 10px; cursor: pointer;
+  }
+  .filters button:hover { background: var(--surface-1); }
+  .filters button[aria-pressed="true"] {
+    background: var(--surface-1); border-color: var(--border);
+    color: var(--ink); font-weight: 600;
+  }
+
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 18px 12px; margin-bottom: 20px;
+    position: relative;
+  }
+  .card h2 { font-size: 15px; font-weight: 600; }
+  .card .desc { font-size: 12.5px; color: var(--ink-2); margin: 2px 0 10px; }
+  .chart-wrap { position: relative; }
+  svg { display: block; width: 100%; height: auto; }
+  .tooltip {
+    position: absolute; pointer-events: none; display: none;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 12.5px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12); z-index: 5; min-width: 120px;
+  }
+  .tooltip .t-date { color: var(--ink-2); margin-bottom: 3px; }
+  .tooltip .t-row { display: flex; align-items: center; gap: 7px; }
+  .tooltip .t-key { width: 14px; height: 0; border-top: 2.5px solid var(--series-1); border-radius: 2px; }
+  .legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--ink-2); margin: 2px 0 8px; }
+  .legend .l-item { display: flex; align-items: center; gap: 6px; }
+  .legend .l-key { width: 16px; height: 0; border-top: 2.5px solid; border-radius: 2px; }
+  .tooltip .t-val { font-weight: 650; }
+  .tooltip .t-name { color: var(--ink-2); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--ink-2); font-weight: 600; padding: 6px 10px; border-bottom: 1px solid var(--grid); }
+  td { padding: 6px 10px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; }
+  details { margin-top: 6px; }
+  summary { cursor: pointer; font-size: 13px; color: var(--ink-2); padding: 6px 0; }
+  .scroll-x { overflow-x: auto; }
+
+  footer { color: var(--muted); font-size: 12px; margin-top: 28px; }
+  footer p { margin-bottom: 6px; }
+  footer a { color: var(--ink-2); }
+  .empty { color: var(--muted); font-size: 14px; padding: 30px 0; text-align: center; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>SVIX30 — Swedish Implied Volatility Index</h1>
+    <div class="sub">30-day model-free implied volatility of the OMXS30 index, VIX methodology</div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="filters" id="filters" role="group" aria-label="Date range">
+    <span class="flabel">Range</span>
+  </div>
+
+  <div class="card">
+    <h2>SVIX30 history</h2>
+    <div class="desc">Daily closing values, volatility points (annualised %)</div>
+    <div class="legend" id="history-legend"></div>
+    <div class="chart-wrap" id="history-chart"></div>
+    <details>
+      <summary>Table view</summary>
+      <div class="scroll-x"><table id="history-table"></table></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Volatility term structure</h2>
+    <div class="desc">Per listed expiration, latest snapshot. The variance-swap strip is
+      sensitive to how far the quoted wings reach; ATM IV is the smoother reference.</div>
+    <div class="legend" id="term-legend"></div>
+    <div class="chart-wrap" id="term-chart"></div>
+    <div class="scroll-x"><table id="term-table"></table></div>
+  </div>
+
+  <footer>
+    <p><strong>Methodology.</strong> SVIX30 replicates the CBOE VIX calculation on OMXS30
+    options listed on Nasdaq Stockholm: forwards are estimated per expiration via put-call
+    parity, model-free variance is computed from out-of-the-money bid/ask mid-quotes, and
+    the two expirations bracketing 30 days are interpolated in total variance to a constant
+    30-day horizon. Quotes are 15-minute-delayed pre-trade data from Nasdaq Nordic trade
+    reports. This is an unofficial research index, not investment advice.</p>
+    <p id="foot-meta"></p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+const DATA = /*__DATA__*/null;
+
+(function () {
+  if (!DATA || !DATA.history) {
+    document.getElementById("history-chart").innerHTML =
+      '<div class="empty">No data yet — run update_index.py to populate this page.</div>';
+    return;
+  }
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt2 = (x) => (x == null || isNaN(x)) ? "–" : Number(x).toFixed(2);
+  const hist = DATA.history.map(d => ({
+      date: d.date, v: +d.svix30,
+      a: (d.atm30 == null || isNaN(+d.atm30)) ? null : +d.atm30,
+    })).filter(d => !isNaN(d.v));
+  const hasAtm = hist.some(d => d.a != null);
+  const term = DATA.term_structure || [];
+  const meta = DATA.meta || {};
+
+  // ---- header meta ------------------------------------------------------
+  document.getElementById("meta").textContent =
+    "Trade date " + (meta.trade_date || "–") + " · updated " + (meta.updated || "–") +
+    " · source: Nasdaq Nordic pre-trade (" + (meta.source_file || "") + ")";
+  document.getElementById("foot-meta").textContent =
+    "Risk-free rate " + fmt2(meta.rate_pct) + " % · " +
+    "underlying " + (meta.underlying || "OMXS30") + ".";
+
+  // ---- stat tiles -------------------------------------------------------
+  const last = hist[hist.length - 1];
+  const prev = hist.length > 1 ? hist[hist.length - 2] : null;
+  const stats = document.getElementById("stats");
+  function tile(label, value, sub, hero) {
+    const el = document.createElement("div");
+    el.className = "tile" + (hero ? " hero" : "");
+    const l = document.createElement("div"); l.className = "label"; l.textContent = label;
+    const v = document.createElement("div"); v.className = "value"; v.textContent = value;
+    el.append(l, v);
+    if (sub) { const s = document.createElement("div"); s.className = "delta"; s.textContent = sub; el.append(s); }
+    stats.append(el);
+  }
+  let delta = "";
+  if (prev && last) {
+    const d = last.v - prev.v;
+    delta = (d >= 0 ? "+" : "") + d.toFixed(2) + " vs " + prev.date;
+  }
+  tile("SVIX30", last ? fmt2(last.v) : "–", delta || (last ? "as of " + last.date : ""), true);
+  tile("OMXS30 forward", fmt2(meta.spot), "nearest expiry, parity estimate");
+  if (meta.atm30 != null) tile("ATM 30d IV", fmt2(meta.atm30), "at-the-money, interpolated");
+  if (meta.near) tile("Near-term vol", fmt2(meta.near.vol),
+    meta.near.expiry + " · " + meta.near.days + " d");
+  if (meta.next) tile("Next-term vol", fmt2(meta.next.vol),
+    meta.next.expiry + " · " + meta.next.days + " d");
+
+  // ---- range filter -----------------------------------------------------
+  const RANGES = [["1M", 31], ["3M", 92], ["6M", 183], ["1Y", 366], ["All", Infinity]];
+  let rangeDays = Infinity;
+  const filters = document.getElementById("filters");
+  RANGES.forEach(([label, days]) => {
+    const b = document.createElement("button");
+    b.textContent = label;
+    b.setAttribute("aria-pressed", days === rangeDays ? "true" : "false");
+    b.addEventListener("click", () => {
+      rangeDays = days;
+      filters.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      drawHistory();
+    });
+    filters.append(b);
+  });
+
+  // ---- shared svg helpers ------------------------------------------------
+  const NS = "http://www.w3.org/2000/svg";
+  function el(name, attrs) {
+    const e = document.createElementNS(NS, name);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function niceTicks(lo, hi, n) {
+    if (lo === hi) { lo -= 1; hi += 1; }
+    const span = hi - lo, step0 = span / Math.max(n - 1, 1);
+    const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+    const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => span / s <= n) || 10 * mag;
+    const ticks = [];
+    for (let t = Math.ceil(lo / step) * step; t <= hi + 1e-9; t += step)
+      ticks.push(Math.round(t * 100) / 100);
+    return ticks;
+  }
+  function makeTooltip(wrap) {
+    const tt = document.createElement("div");
+    tt.className = "tooltip";
+    wrap.append(tt);
+    return tt;
+  }
+  function ttContent(tt, dateStr, rows) {
+    tt.textContent = "";
+    const d = document.createElement("div"); d.className = "t-date"; d.textContent = dateStr;
+    tt.append(d);
+    for (const r of rows) {
+      const row = document.createElement("div"); row.className = "t-row";
+      const key = document.createElement("span"); key.className = "t-key";
+      if (r.color) key.style.borderTopColor = css(r.color);
+      const v = document.createElement("span"); v.className = "t-val"; v.textContent = r.val;
+      const n = document.createElement("span"); n.className = "t-name"; n.textContent = r.name;
+      row.append(key, v, n);
+      tt.append(row);
+    }
+  }
+  function placeTooltip(tt, wrap, x, y) {
+    tt.style.display = "block";
+    const w = wrap.clientWidth, tw = tt.offsetWidth;
+    tt.style.left = Math.min(Math.max(x + 14, 4), w - tw - 4) + "px";
+    tt.style.top = Math.max(y - 40, 4) + "px";
+  }
+
+  // ---- history line chart -------------------------------------------------
+  const H_W = 940, H_H = 320, PAD = { l: 44, r: 56, t: 12, b: 26 };
+  const histWrap = document.getElementById("history-chart");
+  const histTT = makeTooltip(histWrap);
+
+  const SERIES = [{ key: "v", name: "SVIX30", color: "--series-1" }];
+  if (hasAtm) SERIES.push({ key: "a", name: "ATM 30d IV", color: "--series-2" });
+  const legend = document.getElementById("history-legend");
+  if (SERIES.length > 1) {
+    SERIES.forEach(s => {
+      const it = document.createElement("span"); it.className = "l-item";
+      const k = document.createElement("span"); k.className = "l-key";
+      k.style.borderTopColor = css(s.color);
+      const n = document.createElement("span"); n.textContent = s.name;
+      it.append(k, n); legend.append(it);
+    });
+  } else {
+    legend.remove();
+  }
+
+  function drawHistory() {
+    const cutoff = rangeDays === Infinity ? null :
+      new Date(Date.now() - rangeDays * 864e5).toISOString().slice(0, 10);
+    const pts = cutoff ? hist.filter(d => d.date >= cutoff) : hist.slice();
+    histWrap.querySelectorAll("svg, .empty").forEach(e => e.remove());
+    if (!pts.length) {
+      const e = document.createElement("div"); e.className = "empty";
+      e.textContent = "No observations in this range.";
+      histWrap.append(e); return;
+    }
+    const svg = el("svg", { viewBox: `0 0 ${H_W} ${H_H}`, role: "img",
+      "aria-label": "SVIX30 daily history line chart" });
+    const iw = H_W - PAD.l - PAD.r, ih = H_H - PAD.t - PAD.b;
+    const vs = pts.map(p => p.v)
+      .concat(hasAtm ? pts.filter(p => p.a != null).map(p => p.a) : []);
+    let lo = Math.min(...vs), hi = Math.max(...vs);
+    const margin = Math.max((hi - lo) * 0.15, 1);
+    lo = Math.max(0, lo - margin); hi = hi + margin;
+    const X = (i) => pts.length === 1 ? PAD.l + iw / 2
+                     : PAD.l + (i / (pts.length - 1)) * iw;
+    const Y = (v) => PAD.t + ih - ((v - lo) / (hi - lo)) * ih;
+
+    // gridlines + y ticks
+    for (const t of niceTicks(lo, hi, 6)) {
+      const y = Y(t);
+      svg.append(el("line", { x1: PAD.l, x2: H_W - PAD.r, y1: y, y2: y,
+        stroke: css("--grid"), "stroke-width": 1 }));
+      const lbl = el("text", { x: PAD.l - 8, y: y + 4, "text-anchor": "end",
+        "font-size": 11, fill: css("--muted") });
+      lbl.textContent = t;
+      svg.append(lbl);
+    }
+    // x ticks (~5 dates)
+    const nx = Math.min(pts.length, 5);
+    for (let k = 0; k < nx; k++) {
+      const i = Math.round(k * (pts.length - 1) / Math.max(nx - 1, 1));
+      const lbl = el("text", { x: X(i), y: H_H - 8, "text-anchor": "middle",
+        "font-size": 11, fill: css("--muted") });
+      lbl.textContent = pts[i].date;
+      svg.append(lbl);
+    }
+    // baseline
+    svg.append(el("line", { x1: PAD.l, x2: H_W - PAD.r, y1: PAD.t + ih, y2: PAD.t + ih,
+      stroke: css("--baseline"), "stroke-width": 1 }));
+
+    // ATM series first (recessive), SVIX30 on top; gaps where a value is null
+    for (const s of SERIES.slice().reverse()) {
+      const segs = [];
+      let cur = [];
+      pts.forEach((p, i) => {
+        const val = p[s.key];
+        if (val == null || isNaN(val)) { if (cur.length) segs.push(cur); cur = []; }
+        else cur.push([X(i), Y(val)]);
+      });
+      if (cur.length) segs.push(cur);
+      for (const seg of segs) {
+        if (seg.length > 1) {
+          const d = seg.map((q, i) => (i ? "L" : "M") + q[0] + " " + q[1]).join(" ");
+          if (s.key === "v") {
+            svg.append(el("path", {
+              d: d + ` L ${seg[seg.length - 1][0]} ${PAD.t + ih} L ${seg[0][0]} ${PAD.t + ih} Z`,
+              fill: css(s.color), opacity: 0.1 }));
+          }
+          svg.append(el("path", { d, fill: "none", stroke: css(s.color),
+            "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+        }
+      }
+      // end dot with surface ring
+      for (let i = pts.length - 1; i >= 0; i--) {
+        const val = pts[i][s.key];
+        if (val == null || isNaN(val)) continue;
+        svg.append(el("circle", { cx: X(i), cy: Y(val), r: 6, fill: css("--surface-1") }));
+        svg.append(el("circle", { cx: X(i), cy: Y(val), r: 4, fill: css(s.color) }));
+        if (s.key === "v") {   // direct end label on the headline series only
+          const endLbl = el("text", { x: X(i) + 10, y: Y(val) + 4,
+            "font-size": 12, "font-weight": 650, fill: css("--ink") });
+          endLbl.textContent = val.toFixed(2);
+          svg.append(endLbl);
+        }
+        break;
+      }
+    }
+
+    // crosshair + hover layer (one tooltip, every series)
+    const cross = el("line", { y1: PAD.t, y2: PAD.t + ih, stroke: css("--baseline"),
+      "stroke-width": 1, visibility: "hidden" });
+    svg.append(cross);
+    const hoverDots = SERIES.map(s => {
+      const dot = el("circle", { r: 5, fill: css(s.color),
+        stroke: css("--surface-1"), "stroke-width": 2, visibility: "hidden" });
+      svg.append(dot);
+      return dot;
+    });
+    const hit = el("rect", { x: PAD.l, y: PAD.t, width: iw, height: ih,
+      fill: "transparent" });
+    svg.append(hit);
+    function onMove(ev) {
+      const r = svg.getBoundingClientRect();
+      const mx = (ev.clientX - r.left) * (H_W / r.width);
+      let best = 0, bd = Infinity;
+      for (let i = 0; i < pts.length; i++) {
+        const d = Math.abs(X(i) - mx);
+        if (d < bd) { bd = d; best = i; }
+      }
+      const x = X(best);
+      cross.setAttribute("x1", x); cross.setAttribute("x2", x);
+      cross.setAttribute("visibility", "visible");
+      const rows = [];
+      SERIES.forEach((s, si) => {
+        const val = pts[best][s.key];
+        if (val == null || isNaN(val)) {
+          hoverDots[si].setAttribute("visibility", "hidden");
+        } else {
+          hoverDots[si].setAttribute("cx", x);
+          hoverDots[si].setAttribute("cy", Y(val));
+          hoverDots[si].setAttribute("visibility", "visible");
+          rows.push({ name: s.name, val: val.toFixed(2), color: s.color });
+        }
+      });
+      ttContent(histTT, pts[best].date, rows);
+      placeTooltip(histTT, histWrap, x * (r.width / H_W),
+        Y(pts[best].v) * (r.height / H_H));
+    }
+    function onLeave() {
+      cross.setAttribute("visibility", "hidden");
+      hoverDots.forEach(d => d.setAttribute("visibility", "hidden"));
+      histTT.style.display = "none";
+    }
+    hit.addEventListener("pointermove", onMove);
+    hit.addEventListener("pointerleave", onLeave);
+    histWrap.prepend(svg);
+  }
+  drawHistory();
+
+  // ---- history table ------------------------------------------------------
+  const ht = document.getElementById("history-table");
+  ht.innerHTML = "<thead><tr><th>Date</th><th class='num'>SVIX30</th>" +
+    (hasAtm ? "<th class='num'>ATM 30d IV</th>" : "") + "</tr></thead>";
+  const tb = document.createElement("tbody");
+  hist.slice().reverse().forEach(d => {
+    const tr = document.createElement("tr");
+    const td1 = document.createElement("td"); td1.textContent = d.date;
+    const td2 = document.createElement("td"); td2.className = "num";
+    td2.textContent = d.v.toFixed(2);
+    tr.append(td1, td2);
+    if (hasAtm) {
+      const td3 = document.createElement("td"); td3.className = "num";
+      td3.textContent = d.a == null ? "–" : d.a.toFixed(2);
+      tr.append(td3);
+    }
+    tb.append(tr);
+  });
+  ht.append(tb);
+
+  // ---- term structure chart ----------------------------------------------
+  const termWrap = document.getElementById("term-chart");
+  const termLegend = document.getElementById("term-legend");
+  if (term.length) {
+    const T_SERIES = [
+      { key: "vol", name: "Var-swap vol", color: "--series-1" },
+      { key: "atm_iv", name: "ATM IV", color: "--series-2" },
+    ];
+    T_SERIES.forEach(s => {
+      const it = document.createElement("span"); it.className = "l-item";
+      const k = document.createElement("span"); k.className = "l-key";
+      k.style.borderTopColor = css(s.color);
+      const n = document.createElement("span"); n.textContent = s.name;
+      it.append(k, n); termLegend.append(it);
+    });
+
+    const T_W = 940, T_H = 240, TP = { l: 44, r: 24, t: 12, b: 30 };
+    const svg = el("svg", { viewBox: `0 0 ${T_W} ${T_H}`, role: "img",
+      "aria-label": "Volatility term structure by days to expiry" });
+    const iw = T_W - TP.l - TP.r, ih = T_H - TP.t - TP.b;
+    const xs = term.map(t => t.days);
+    const ys = term.map(t => t.vol)
+      .concat(term.filter(t => t.atm_iv != null).map(t => t.atm_iv));
+    const xlo = 0, xhi = Math.max(...xs) * 1.06;
+    let ylo = Math.min(...ys), yhi = Math.max(...ys);
+    const ym = Math.max((yhi - ylo) * 0.25, 1);
+    ylo = Math.max(0, ylo - ym); yhi += ym;
+    const X = (d) => TP.l + ((d - xlo) / (xhi - xlo)) * iw;
+    const Y = (v) => TP.t + ih - ((v - ylo) / (yhi - ylo)) * ih;
+
+    for (const t of niceTicks(ylo, yhi, 5)) {
+      const y = Y(t);
+      svg.append(el("line", { x1: TP.l, x2: T_W - TP.r, y1: y, y2: y,
+        stroke: css("--grid"), "stroke-width": 1 }));
+      const lbl = el("text", { x: TP.l - 8, y: y + 4, "text-anchor": "end",
+        "font-size": 11, fill: css("--muted") });
+      lbl.textContent = t; svg.append(lbl);
+    }
+    for (const t of niceTicks(xlo, xhi, 7)) {
+      const lbl = el("text", { x: X(t), y: T_H - 8, "text-anchor": "middle",
+        "font-size": 11, fill: css("--muted") });
+      lbl.textContent = t + "d"; svg.append(lbl);
+    }
+    svg.append(el("line", { x1: TP.l, x2: T_W - TP.r, y1: TP.t + ih, y2: TP.t + ih,
+      stroke: css("--baseline"), "stroke-width": 1 }));
+
+    for (const s of T_SERIES.slice().reverse()) {
+      const pts2 = term.filter(t => t[s.key] != null);
+      if (pts2.length > 1) {
+        const path = pts2.map((t, i) =>
+          (i ? "L" : "M") + X(t.days) + " " + Y(t[s.key])).join(" ");
+        svg.append(el("path", { d: path, fill: "none", stroke: css(s.color),
+          "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      }
+      pts2.forEach(t => {
+        svg.append(el("circle", { cx: X(t.days), cy: Y(t[s.key]), r: 6,
+          fill: css("--surface-1") }));
+        svg.append(el("circle", { cx: X(t.days), cy: Y(t[s.key]), r: 4,
+          fill: css(s.color) }));
+      });
+    }
+    const termTT = makeTooltip(termWrap);
+    term.forEach(t => {
+      const hit = el("circle", { cx: X(t.days), cy: Y(t.vol), r: 16,
+        fill: "transparent" });
+      hit.addEventListener("pointermove", () => {
+        const r = svg.getBoundingClientRect();
+        const rows = [{ name: "Var-swap vol", val: t.vol.toFixed(2), color: "--series-1" }];
+        if (t.atm_iv != null)
+          rows.push({ name: "ATM IV", val: t.atm_iv.toFixed(2), color: "--series-2" });
+        ttContent(termTT, t.expiry + " · " + t.days + " days", rows);
+        placeTooltip(termTT, termWrap,
+          X(t.days) * (r.width / T_W), Y(t.vol) * (r.height / T_H));
+      });
+      hit.addEventListener("pointerleave", () => termTT.style.display = "none");
+      svg.append(hit);
+    });
+    termWrap.append(svg);
+  } else {
+    termLegend.remove();
+    termWrap.innerHTML = '<div class="empty">No term structure in latest snapshot.</div>';
+  }
+
+  // ---- term structure table -----------------------------------------------
+  const tt2 = document.getElementById("term-table");
+  tt2.innerHTML = "<thead><tr><th>Expiry</th><th class='num'>Days</th>" +
+    "<th class='num'>Forward</th><th class='num'>Var-swap vol</th>" +
+    "<th class='num'>ATM IV</th><th class='num'>OTM quotes</th></tr></thead>";
+  const tb2 = document.createElement("tbody");
+  term.forEach(t => {
+    const tr = document.createElement("tr");
+    [t.expiry, t.days, fmt2(t.forward), fmt2(t.vol),
+     t.atm_iv == null ? "–" : fmt2(t.atm_iv), t.n_options].forEach((v, i) => {
+      const td = document.createElement("td");
+      if (i > 0) td.className = "num";
+      td.textContent = v;
+      tr.append(td);
+    });
+    tb2.append(tr);
+  });
+  tt2.append(tb2);
+})();
+</script>
+</body>
+</html>
