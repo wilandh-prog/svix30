@@ -1,2 +1,3 @@
 date,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,next_days,next_vol,n_options,file
 2026-07-06,15.68,14.39,3233.54,31-Jul-26,25.0,16.13,07-Aug-26,32.0,15.53,413,NordicDerivatives-pretrade-2026-07-06T1724
+2026-07-07,14.03,15.18,3208.61,Jul-26,10.0,12.81,Aug-26,45.0,14.22,65,NordicDerivatives-pretrade-2026-07-07T1714
