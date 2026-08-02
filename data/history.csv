@@ -1165,9 +1165,9 @@ date,underlying,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,nex
 2026-07-30,VSURE,38.10,34.92,10.85,Aug-26,22.0,38.44,Sep-26,50.0,37.73,112,NordicDerivatives-pretrade-2026-07-30T1724
 2026-07-31,ABB,27.16,26.53,941.90,28-Aug-26,28.0,27.02,Sep-26,49.0,27.95,234,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,ADDTB,24.31,25.15,347.14,Aug-26,21.0,23.84,Sep-26,49.0,24.73,32,NordicDerivatives-pretrade-2026-07-31T1724
-2026-07-31,ALFA,23.31,23.57,567.02,Aug-26,21.0,23.91,Sep-26,49.0,22.77,58,NordicDerivatives-pretrade-2026-07-31T1724
+2026-07-31,ALFA,23.31,23.57,567.02,Aug-26,21.0,23.90,Sep-26,49.0,22.77,58,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,ASSAB,21.41,20.49,355.06,Aug-26,21.0,20.84,Sep-26,49.0,21.92,69,NordicDerivatives-pretrade-2026-07-31T1724
-2026-07-31,ATCOA,25.16,25.11,201.85,28-Aug-26,28.0,24.91,Sep-26,49.0,26.44,138,NordicDerivatives-pretrade-2026-07-31T1724
+2026-07-31,ATCOA,25.16,25.11,201.85,28-Aug-26,28.0,24.91,Sep-26,49.0,26.45,138,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,ATCOB,23.27,26.38,176.77,Aug-26,21.0,22.03,Oct-26,77.0,24.93,16,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,AXFO,21.35,21.37,242.79,Aug-26,21.0,19.59,Sep-26,49.0,22.82,157,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,AZN,26.02,25.62,1619.33,Aug-26,21.0,25.57,Sep-26,49.0,26.42,98,NordicDerivatives-pretrade-2026-07-31T1724
@@ -1185,7 +1185,7 @@ date,underlying,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,nex
 2026-07-31,ESSITB,18.45,17.65,278.38,Sep-26,49.0,18.34,Oct-26,77.0,18.27,73,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,EVO,29.02,28.66,729.72,28-Aug-26,28.0,28.84,Sep-26,49.0,29.98,181,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,GETIB,22.80,23.08,237.08,Aug-26,21.0,22.08,Sep-26,49.0,23.43,75,NordicDerivatives-pretrade-2026-07-31T1724
-2026-07-31,HEXB,27.90,32.39,94.17,Aug-26,21.0,24.29,Dec-26,140.0,33.52,35,NordicDerivatives-pretrade-2026-07-31T1724
+2026-07-31,HEXB,27.90,32.39,94.17,Aug-26,21.0,24.30,Dec-26,140.0,33.52,35,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,HMB,20.33,21.46,174.31,28-Aug-26,28.0,19.73,Sep-26,49.0,23.33,132,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,HOLMB,21.54,20.45,323.87,Aug-26,21.0,22.03,Sep-26,49.0,21.09,142,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,INDUC,16.30,19.31,546.94,Aug-26,21.0,16.98,Sep-26,49.0,15.67,61,NordicDerivatives-pretrade-2026-07-31T1724
@@ -1198,9 +1198,9 @@ date,underlying,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,nex
 2026-07-31,NDASE,14.87,19.46,190.13,28-Aug-26,28.0,14.49,Sep-26,49.0,16.83,95,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,NEWAB,41.73,38.79,94.70,Aug-26,21.0,47.31,Sep-26,49.0,35.94,112,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,NIBE,34.35,,38.37,Aug-26,21.0,30.66,Sep-26,49.0,37.38,23,NordicDerivatives-pretrade-2026-07-31T1724
-2026-07-31,OCTV,70.42,59.16,172.72,Dec-26,140.0,42.73,Mar-27,231.0,38.59,36,NordicDerivatives-pretrade-2026-07-31T1724
+2026-07-31,OCTV,70.42,59.17,172.72,Dec-26,140.0,42.73,Mar-27,231.0,38.59,36,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,OMXS30,16.18,14.71,3263.04,28-Aug-26,28.0,14.08,Sep-26,49.0,24.62,367,NordicDerivatives-pretrade-2026-07-31T1724
-2026-07-31,QTCOM,98.46,72.05,25.25,Dec-26,140.0,49.84,Mar-27,231.0,41.35,23,NordicDerivatives-pretrade-2026-07-31T1724
+2026-07-31,QTCOM,98.46,72.06,25.25,Dec-26,140.0,49.84,Mar-27,231.0,41.35,23,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,SAAB,33.95,39.90,600.15,28-Aug-26,28.0,32.65,Sep-26,49.0,40.28,159,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,SAND,28.64,28.53,357.72,28-Aug-26,28.0,28.53,Sep-26,49.0,29.23,159,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,SAVE,23.48,24.18,366.02,Aug-26,21.0,22.88,Sep-26,49.0,24.01,33,NordicDerivatives-pretrade-2026-07-31T1724
@@ -1212,7 +1212,7 @@ date,underlying,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,nex
 2026-07-31,SIVE,184.76,195.87,29.80,Aug-26,21.0,193.67,Sep-26,49.0,176.31,188,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,SKAB,21.22,20.72,268.39,Aug-26,21.0,20.50,Sep-26,49.0,21.86,125,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,SKFB,25.88,25.37,257.85,Aug-26,21.0,25.45,Sep-26,49.0,26.27,126,NordicDerivatives-pretrade-2026-07-31T1724
-2026-07-31,SOBI,25.51,26.22,472.00,Aug-26,21.0,25.34,Sep-26,49.0,25.67,72,NordicDerivatives-pretrade-2026-07-31T1724
+2026-07-31,SOBI,25.51,26.22,471.99,Aug-26,21.0,25.34,Sep-26,49.0,25.67,72,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,SSABA,28.12,32.89,100.22,28-Aug-26,28.0,26.87,Sep-26,49.0,34.09,177,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,SSABB,27.82,32.76,100.23,Aug-26,21.0,29.70,Sep-26,49.0,26.00,27,NordicDerivatives-pretrade-2026-07-31T1724
 2026-07-31,STER,27.76,28.16,109.90,28-Aug-26,28.0,28.29,Sep-26,49.0,24.70,161,NordicDerivatives-pretrade-2026-07-31T1724
