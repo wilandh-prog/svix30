@@ -1767,10 +1767,10 @@ date,underlying,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,nex
 2026-08-14,LATOB,25.59,24.42,193.52,Aug-26,7.0,30.01,Sep-26,35.0,25.38,49,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,LUMI,44.19,45.33,241.19,Aug-26,7.0,47.66,Sep-26,35.0,44.03,119,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,NCC,17.99,20.72,177.65,Aug-26,7.0,18.05,Sep-26,35.0,17.99,60,NordicDerivatives-pretrade-2026-08-14T1724
-2026-08-14,NDASE,12.97,9.46,193.25,Dec-26,126.0,20.29,Mar-27,217.0,21.06,63,NordicDerivatives-pretrade-2026-08-14T1724
+2026-08-14,NDASE,12.97,9.46,193.24,Dec-26,126.0,20.29,Mar-27,217.0,21.06,63,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,NEWAB,39.00,38.04,92.40,Aug-26,7.0,71.89,Sep-26,35.0,36.91,118,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,NIBE,132.62,,38.56,Jun-27,308.0,39.36,Dec-27,490.0,30.10,25,NordicDerivatives-pretrade-2026-08-14T1724
-2026-08-14,OCTV,68.02,45.45,182.63,Dec-26,126.0,40.26,Mar-27,217.0,35.03,37,NordicDerivatives-pretrade-2026-08-14T1724
+2026-08-14,OCTV,68.02,45.46,182.63,Dec-26,126.0,40.26,Mar-27,217.0,35.03,37,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,OMXS30,15.95,12.77,3270.49,11-Sep-26,28.0,11.17,Sep-26,35.0,22.66,356,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,SAAB,33.42,37.88,694.13,11-Sep-26,28.0,30.80,Sep-26,35.0,38.14,170,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,SAGAB,24.23,27.17,163.75,Aug-26,7.0,27.28,Sep-26,35.0,24.09,32,NordicDerivatives-pretrade-2026-08-14T1724
@@ -1787,7 +1787,7 @@ date,underlying,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,nex
 2026-08-14,SOBI,24.25,25.14,440.42,Aug-26,7.0,23.14,Sep-26,35.0,24.30,66,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,SSABA,27.33,29.92,106.98,Aug-26,7.0,31.51,Sep-26,35.0,27.14,70,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,STER,30.08,27.91,105.55,Aug-26,7.0,26.59,Sep-26,35.0,30.22,117,NordicDerivatives-pretrade-2026-08-14T1724
-2026-08-14,SWEDA,17.69,17.20,379.01,11-Sep-26,28.0,17.34,Sep-26,35.0,18.36,170,NordicDerivatives-pretrade-2026-08-14T1724
+2026-08-14,SWEDA,17.68,17.20,379.01,11-Sep-26,28.0,17.34,Sep-26,35.0,18.36,170,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,TLSN,13.96,18.62,43.90,Sep-26,35.0,13.93,Oct-26,63.0,13.87,82,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,TRA,31.08,29.74,405.66,Sep-26,35.0,31.31,Oct-26,63.0,31.94,87,NordicDerivatives-pretrade-2026-08-14T1724
 2026-08-14,TRELB,21.45,21.75,434.20,Aug-26,7.0,15.81,Sep-26,35.0,21.66,63,NordicDerivatives-pretrade-2026-08-14T1724
