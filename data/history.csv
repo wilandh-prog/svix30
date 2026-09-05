@@ -2627,7 +2627,7 @@ date,underlying,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,nex
 2026-09-03,VSURE,36.24,34.76,8.96,Sep-26,15.0,38.11,Oct-26,43.0,35.66,90,NordicDerivatives-pretrade-2026-09-03T1724
 2026-09-03,WRT,27.98,27.64,28.58,Oct-26,43.0,32.45,Nov-26,78.0,36.50,17,NordicDerivatives-pretrade-2026-09-03T1724
 2026-09-04,ABB,26.39,26.35,916.35,02-Oct-26,28.0,26.19,Oct-26,42.0,27.17,186,NordicDerivatives-pretrade-2026-09-04T1724
-2026-09-04,ADDTB,22.67,23.34,330.62,Sep-26,14.0,21.94,Oct-26,42.0,22.85,38,NordicDerivatives-pretrade-2026-09-04T1724
+2026-09-04,ADDTB,22.67,23.35,330.62,Sep-26,14.0,21.93,Oct-26,42.0,22.85,38,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,ALFA,19.29,20.18,557.43,Sep-26,14.0,19.78,Oct-26,42.0,19.16,60,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,ASSAB,19.23,20.50,353.52,Sep-26,14.0,19.32,Oct-26,42.0,19.20,68,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,ATCOA,22.19,23.69,202.08,02-Oct-26,28.0,22.64,Oct-26,42.0,20.26,150,NordicDerivatives-pretrade-2026-09-04T1724
@@ -2646,7 +2646,7 @@ date,underlying,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,nex
 2026-09-04,EQT,36.08,34.76,320.21,Sep-26,14.0,32.26,Oct-26,42.0,36.97,159,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,ERICB,23.38,25.20,97.35,02-Oct-26,28.0,23.28,Nov-26,77.0,24.25,107,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,ESSITB,17.76,16.51,272.41,Sep-26,14.0,19.97,Oct-26,42.0,17.17,98,NordicDerivatives-pretrade-2026-09-04T1724
-2026-09-04,EVO,24.74,25.09,847.79,02-Oct-26,28.0,24.09,Oct-26,42.0,27.16,147,NordicDerivatives-pretrade-2026-09-04T1724
+2026-09-04,EVO,24.74,25.09,847.79,02-Oct-26,28.0,24.09,Oct-26,42.0,27.17,147,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,GETIB,21.52,20.10,241.51,Sep-26,14.0,19.79,Oct-26,42.0,21.93,72,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,HEXB,28.74,29.95,96.93,Sep-26,14.0,26.84,Oct-26,42.0,29.19,85,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,HMB,31.98,31.96,175.31,25-Sep-26,21.0,33.14,Oct-26,42.0,31.18,159,NordicDerivatives-pretrade-2026-09-04T1724
@@ -2657,14 +2657,14 @@ date,underlying,svix30,atm30,spot,near_expiry,near_days,near_vol,next_expiry,nex
 2026-09-04,KEMIRA,14.50,15.48,17.44,Oct-26,42.0,22.03,Nov-26,77.0,28.25,20,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,KINB,37.62,36.60,61.25,Sep-26,14.0,32.36,Oct-26,42.0,38.83,116,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,LATOB,22.84,21.93,209.05,Sep-26,14.0,21.74,Oct-26,42.0,23.11,46,NordicDerivatives-pretrade-2026-09-04T1724
-2026-09-04,LUMI,43.88,43.06,246.28,Sep-26,14.0,43.19,Oct-26,42.0,44.05,172,NordicDerivatives-pretrade-2026-09-04T1724
+2026-09-04,LUMI,43.88,43.06,246.29,Sep-26,14.0,43.19,Oct-26,42.0,44.05,172,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,NCC,21.39,20.59,180.70,Sep-26,14.0,20.06,Oct-26,42.0,21.71,81,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,NDASE,15.51,18.19,199.33,Sep-26,14.0,14.54,Nov-26,77.0,16.01,39,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,NEWAB,26.87,28.02,88.84,Sep-26,14.0,16.40,Nov-26,77.0,31.05,65,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,NIBE,27.68,32.19,43.98,Sep-26,14.0,23.67,Oct-26,42.0,28.59,38,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,NOKI,49.74,52.33,96.25,Sep-26,14.0,51.96,Oct-26,42.0,49.17,87,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,NOKIA,38.90,49.63,96.10,25-Sep-26,21.0,40.48,02-Oct-26,28.0,39.17,42,NordicDerivatives-pretrade-2026-09-04T1724
-2026-09-04,OCTV,38.97,35.95,185.49,Sep-26,14.0,36.64,Oct-26,42.0,39.54,159,NordicDerivatives-pretrade-2026-09-04T1724
+2026-09-04,OCTV,38.97,35.95,185.50,Sep-26,14.0,36.64,Oct-26,42.0,39.54,159,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,OMXS30,16.90,13.82,3289.13,Sep-26,14.0,19.49,Oct-26,42.0,16.19,306,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,QTCOM,24.15,25.12,35.53,Oct-26,42.0,38.26,Dec-26,105.0,52.76,50,NordicDerivatives-pretrade-2026-09-04T1724
 2026-09-04,SAAB,35.28,35.36,588.66,02-Oct-26,28.0,34.76,Oct-26,42.0,37.30,193,NordicDerivatives-pretrade-2026-09-04T1724
